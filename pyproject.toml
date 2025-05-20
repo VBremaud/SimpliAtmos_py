@@ -1,0 +1,29 @@
+[project]
+name = "simpliatmos"
+version = "0.1.0"
+description = "Modèle atmosphérique simplifié inspiré de Fluids2d"
+authors = [
+  { name="Vincent Brémaud", email="vincent@example.com" }
+]
+dependencies = [
+  "numpy",
+  "scipy",
+  "matplotlib"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F"]

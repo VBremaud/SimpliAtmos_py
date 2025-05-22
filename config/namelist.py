@@ -20,10 +20,10 @@ class Param:
         self.H = 1.0
 
         # Temps
-        self.tend = 10       # durée totale simulée
+        self.tend = 100     # durée totale simulée
         self.dt = 0.0          # si 0, alors calcul automatique via CFL
         self.dtmax = 0.1      # limite maximale du pas de temps
-        self.maxite = 100    # nombre d’itérations max
+        self.maxite = 3    # nombre d’itérations max
         self.cfl = 0.9
 
         # Impression console / sauvegarde

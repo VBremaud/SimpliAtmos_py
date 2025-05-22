@@ -4,7 +4,7 @@ from time import time
 from simpliatmos.core.grid import Mesh
 from simpliatmos.core.time_integration import RK3Integrator
 from simpliatmos.model.states import State
-from simpliatmos.model.states import init_state 
+from simpliatmos.model.initialisation import init_state 
 from simpliatmos.model.time import Time
 from simpliatmos.io.io import IO
 
@@ -28,7 +28,7 @@ class Model:
 
         while not self.time.finished:
             self.set_dt()
-            print((self.state.b[:,100]))
+            #print((self.state.b[:,100]))
             self.step(1)
             self.progress()
             self.compute_diags()

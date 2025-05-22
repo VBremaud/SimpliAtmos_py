@@ -45,8 +45,14 @@ class IO:
             arr = np.array(vals)  # (nt, ny, nx)
             data_vars[name] = (("time", "y", "x"), arr, {"units": unit})
 
-        coords = self.coords.copy()
-        coords["time"] = ("time", np.array(self.times))
+        # Récupération explicite de x et y depuis la grille
+        x, y = self.mesh.xy()
+
+        coords = {
+            "x": ("x", x[0, :]),
+            "y": ("y", y[:, 0]),
+            "time": ("time", np.array(self.times)),
+        }
 
         ds = xr.Dataset(data_vars=data_vars, coords=coords)
         ds.attrs["description"] = "SimpliAtmos output"

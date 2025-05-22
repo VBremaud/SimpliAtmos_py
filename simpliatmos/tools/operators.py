@@ -25,6 +25,7 @@ def addvortexforce(param, mesh, U, omega, du):
             mesh.yshift,
             -1
         )
+        print(U.x[50,100])
     else:
         vortexforce_weno3(
             du.reshape(-1),

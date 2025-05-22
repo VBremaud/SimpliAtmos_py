@@ -24,8 +24,6 @@ def get_boussinesq(param, mesh):
     def rhs(s, ds):
         """ RHS for Boussinesq model in momentum-pressure"""
         op.addvortexforce(param, mesh, s.U, s.omega, ds.u)
-        print('1',(ds.b[:,100]))
-        print(("U.x",s.U.x[:,100]))
         op.addgrad(mesh, s.ke, ds.u)
         op.addbuoyancy(mesh, s.b, ds.u)
         op.divflux(param, mesh, s.flx, s.b, s.U, ds.b)
@@ -68,7 +66,6 @@ def get_hydrostatic(param, mesh):
     return (rhs, diag)
 
 def get_rhs_and_diag(param, mesh):
-
     equations = {
         "euler": get_euler,
         "boussinesq": get_boussinesq,
@@ -76,4 +73,13 @@ def get_rhs_and_diag(param, mesh):
     }
 
     rhs, diag = equations[param.model](param, mesh)
+
+    if param.forcing is not None:
+        def rhs_with_forcing(s, ds):
+            rhs(s, ds)
+            #print(ds.b[3,100])
+            param.forcing(param, mesh, s, ds)
+            #print(ds.b[3,100])
+        return rhs_with_forcing, diag
+
     return rhs, diag

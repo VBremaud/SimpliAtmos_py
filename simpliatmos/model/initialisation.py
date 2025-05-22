@@ -11,7 +11,7 @@ def init_state(state, mesh, param):
         state.U.y[:, :] = 0.0
 
         b = state.b
-        b[:, :] = 10*y +1e-2*np.random.normal(size=mesh.shape)
+        b[:, :] = 10*y #+1e-2*np.random.normal(size=mesh.shape)
         b *= mesh.msk
         b = state.b
 

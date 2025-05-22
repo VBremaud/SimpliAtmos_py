@@ -28,7 +28,7 @@ class Model:
 
         while not self.time.finished:
             self.set_dt()
-            #print((self.state.b[:,100]))
+            #print("init-p",(self.state.p[50,100]))
             self.step(1)
             self.progress()
             self.compute_diags()

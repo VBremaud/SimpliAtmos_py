@@ -14,9 +14,10 @@ class Mesh:
         self.yshift = self.shape[1]  
         self.param = param
         self.slipcoef = np.ones(self.shape)
-        self.poisson_centers = Poisson2D(self)
         self.set_default_mask()
         self.set_masks()
+        self.poisson_centers = Poisson2D(self)
+    
 
     def set_default_mask(self):
         nh = self.param.halowidth

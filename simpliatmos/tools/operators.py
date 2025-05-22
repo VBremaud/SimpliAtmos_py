@@ -17,6 +17,10 @@ def addvortexforce(param, mesh, U, omega, du):
             mesh.xshift,
             +1
         )
+        #print(U.x[50,100])
+        #print(du.x[50,100])
+        #print(omega[50,100])
+        #print('test')
         vortexforce_weno3(
             du.y.reshape(-1),
             U.x.reshape(-1),
@@ -99,6 +103,8 @@ def sharp(mesh, u, U):
 
 
 def compute_vorticity(mesh, u, omega):
+    #print(u.x[50,100])
+    #print(u.y[50,100])
     if isinstance(u, Vector):
         omega[1:, :] = -np.diff(u.x, axis=0)
         omega[:, 1:] += np.diff(u.y, axis=1)
@@ -137,8 +143,15 @@ def compute_pressure(param, mesh, h, p):
 def pressure_projection(mesh, U, delta, p, u):
     sharp(mesh, u, U)
     div(mesh, U, delta)
+    print("press",u.y[50,100])
+    print("pressure",p[:,100])
+    print(delta[:,100])
+    print(mesh.area)
     mesh.poisson_centers.solve(-delta * mesh.area, p)
+    print("press2",u.y[50,100])
+    print("pressure",p[:,100])
     addgrad(mesh, p, u)
+    print("press3",u.y[50,100])
     mesh.fill(u)
 
 

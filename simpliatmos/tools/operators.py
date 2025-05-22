@@ -1,7 +1,11 @@
+from numba import njit, prange, set_num_threads
 import numpy as np
+import os
 from simpliatmos.model.states import Vector
 from simpliatmos.tools.weno import compflux_weno3, vortexforce_weno3
 
+# Utiliser tous les cœurs disponibles
+set_num_threads(os.cpu_count())
 
 def addvortexforce(param, mesh, U, omega, du):
     if isinstance(du, Vector):
@@ -40,6 +44,7 @@ def divflux(param, mesh, flx, q, U, dq):
         mesh.xshift,
         q.size
     )
+
     compflux_weno3(
         flx.y.reshape(-1),
         U.y.reshape(-1),
@@ -50,6 +55,7 @@ def divflux(param, mesh, flx, q, U, dq):
     div(mesh, flx, dq)
 
 
+
 def addcoriolis(param, mesh, U, du):
     f = param.f0 * mesh.area * 0.25
     du.x[:-1, 1:-1] += f * (U.y[:-1, :-2] + U.y[1:, :-2] +
@@ -58,12 +64,29 @@ def addcoriolis(param, mesh, U, du):
                             U.x[1:-1, :-1] + U.x[1:-1, 1:])
 
 
+@njit(parallel=True)
+def njit_addgrad(phi, dux, duy, mskx, msky):
+    ny, nx = phi.shape
+    for j in prange(1, ny):
+        for i in range(1, nx):
+            dux[j, i] -= (phi[j, i] - phi[j, i-1]) * mskx[j, i]
+            duy[j, i] -= (phi[j, i] - phi[j-1, i]) * msky[j, i]
+
+
+@njit(parallel=True)
+def njit_addgrad(phi, dux, duy, mskx, msky):
+    ny, nx = phi.shape
+    for j in prange(1, ny):
+        for i in range(1, nx):
+            dux[j, i] -= (phi[j, i] - phi[j, i-1]) * mskx[j, i]
+            duy[j, i] -= (phi[j, i] - phi[j-1, i]) * msky[j, i]
+
 def addgrad(mesh, phi, du):
     if isinstance(du, Vector):
-        du.x[:, 1:] -= np.diff(phi, axis=1) * mesh.mskx[:, 1:]
-        du.y[1:, :] -= np.diff(phi, axis=0) * mesh.msky[1:, :]
+        njit_addgrad(phi, du.x, du.y, mesh.mskx, mesh.msky)
     else:
-        du[:, 1:] -= np.diff(phi, axis=1) * mesh.mskx[:, 1:]
+        dummy = np.zeros_like(du)
+        njit_addgrad(phi, du, dummy, mesh.mskx, mesh.msky)
 
 
 def sharp(mesh, u, U):
@@ -95,11 +118,16 @@ def compute_kinetic_energy(param, mesh, u, U, ke):
         ke *= mesh.msk * 0.25
 
 
-def div(mesh, U, delta):
-    delta[:, :-1] = -np.diff(U.x, axis=1)
-    delta[:-1, :] -= np.diff(U.y, axis=0)
-    delta *= mesh.msk
+@njit(parallel=True)
+def njit_div(Ux, Uy, delta, msk):
+    ny, nx = delta.shape
+    for j in prange(ny - 1):
+        for i in range(nx - 1):
+            delta[j, i] = -(Ux[j, i+1] - Ux[j, i]) - (Uy[j+1, i] - Uy[j, i])
+            delta[j, i] *= msk[j, i]
 
+def div(mesh, U, delta):
+    njit_div(U.x, U.y, delta, mesh.msk)
 
 def compute_pressure(param, mesh, h, p):
     p[:] = (param.g / mesh.area) * (h + mesh.hb)
@@ -127,3 +155,12 @@ def fill(mesh, *variables):
                 fill(mesh, v)
         else:
             pass  # pas encore de halo à remplir
+
+
+def compute_vertical_velocity(mesh, U):
+    U.y[1:, :-1] = -np.cumsum(np.diff(U.x[:-1, :], axis=1), axis=0)
+
+def compute_hydrostatic_pressure(mesh, b, p):
+    p[:, :] = 0.5*b
+    p[-1::-1, :] -= np.cumsum(b[-1::-1, :], axis=0)
+    p *= (mesh.msk*mesh.dx**2)

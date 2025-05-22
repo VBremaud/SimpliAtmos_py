@@ -9,9 +9,7 @@ class Mesh:
         self.dy = param.Ly / self.ny
         self.area = self.dx * self.dy
         self.shape = (self.ny + 2 * param.halowidth, self.nx + 2 * param.halowidth)
-        self.x = np.arange(self.shape[1]) * self.dx - self.dx * param.halowidth
-        self.y = np.arange(self.shape[0]) * self.dy - self.dy * param.halowidth
-
+        
         self.xshift = 1
         self.yshift = self.shape[1]  
         self.param = param
@@ -32,9 +30,18 @@ class Mesh:
         self.msky = np.zeros_like(self.msk, dtype="i1")
         self.msky[1:, :] = self.msk[1:, :] * self.msk[:-1, :]
 
+    def x(self, which):
+        idx = get_idx(self.param, self.param.xperiodic, self.nx)
+        shift = 0.5 if which in ["c", "y"] else 0.0
+        return (idx+shift)*self.dx
 
-    def xy(self):
-        return np.meshgrid(self.x, self.y)
+    def y(self, which):
+        idx = get_idx(self.param, self.param.yperiodic, self.ny)
+        shift = 0.5 if which in ["c", "x"] else 0.0
+        return (idx+shift)*self.dy
+
+    def xy(self, which="c"):
+        return np.meshgrid(self.x(which), self.y(which))
 
     def fill(self, variable):
         """Applique le remplissage des bords pour la périodicité en x"""
@@ -47,3 +54,6 @@ class Mesh:
                 for field in variable:
                     self.fill(getattr(variable, field))
         # tu pourras étendre pour yperiodic, ou autres BCs
+    
+def get_idx(param, periodic, n):
+    return np.arange(n+2*param.halowidth)-param.halowidth

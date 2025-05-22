@@ -2,14 +2,16 @@ class Param:
     def __init__(self):
         # Choix du modèle
         self.model = "boussinesq"  # "euler", "boussinesq", "hydrostatic"
+        self.forcing = "thermal_forcing"
+        self.Q = 0
 
         # Grille
-        self.nx = 1024
-        self.ny = 1024
-        self.Lx = 1.0
+        self.nx = 200
+        self.ny = 50
+        self.Lx = 4.0
         self.Ly = 1.0
         self.halowidth = 3
-        self.xperiodic = True
+        self.xperiodic = False
         self.yperiodic = False
 
         # Constantes physiques
@@ -20,13 +22,13 @@ class Param:
         # Temps
         self.tend = 10       # durée totale simulée
         self.dt = 0.0          # si 0, alors calcul automatique via CFL
-        self.dtmax = 0.05      # limite maximale du pas de temps
-        self.maxite = 10000    # nombre d’itérations max
-        self.cfl = 0.5
+        self.dtmax = 0.1      # limite maximale du pas de temps
+        self.maxite = 100    # nombre d’itérations max
+        self.cfl = 0.9
 
         # Impression console / sauvegarde
         self.nprint = 10
-        self.nhis = 5         # 0 = pas de fichier de sortie
+        self.nhis = 10         # 0 = pas de fichier de sortie
 
         # Méthodes numériques
         self.integrator = "rk3"

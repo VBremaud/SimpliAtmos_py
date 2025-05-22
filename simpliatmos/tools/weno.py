@@ -2,6 +2,7 @@ from numba import njit, prange, set_num_threads
 import os
 import numpy as np
 
+
 # Utiliser tous les cœurs disponibles
 set_num_threads(os.cpu_count())
 

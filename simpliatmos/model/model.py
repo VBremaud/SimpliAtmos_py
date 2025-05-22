@@ -4,6 +4,7 @@ from time import time
 from simpliatmos.core.grid import Mesh
 from simpliatmos.core.time_integration import RK3Integrator
 from simpliatmos.model.states import State
+from simpliatmos.model.states import init_state 
 from simpliatmos.model.time import Time
 from simpliatmos.io.io import IO
 
@@ -15,9 +16,11 @@ class Model:
 
         self.mesh = Mesh(param)
         self.state = State(param, self.mesh.shape)
+        init_state(self.state, self.mesh, self.param)
         self.integrator = RK3Integrator(param, self.mesh)
         self.time = Time(param)
         self.io = IO(param, self.mesh, self.state, self.time)
+        self.diags = []
 
     def run(self):
         tic = time()
@@ -25,8 +28,10 @@ class Model:
 
         while not self.time.finished:
             self.set_dt()
+            print((self.state.b[:,100]))
             self.step(1)
             self.progress()
+            self.compute_diags()
             self.save_to_file()
 
         toc = time()
@@ -34,7 +39,7 @@ class Model:
 
     def step(self, nsteps=1):
         for _ in range(nsteps):
-            self.integrator.step(self.state, self.time)
+            self.integrator.step(self.state, self.param, self.mesh, self.time)
 
     def set_dt(self):
         if self.param.dt > 0:
@@ -59,6 +64,10 @@ class Model:
                 f"dt={self.time.dt:.2g}"
             ]
             print(" ".join(msg), end="")
+
+    def compute_diags(self):
+        for diag in self.diags:
+            diag()
 
     def save_to_file(self):
         if self.time.save_to_file:

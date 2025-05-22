@@ -24,10 +24,13 @@ def get_boussinesq(param, mesh):
     def rhs(s, ds):
         """ RHS for Boussinesq model in momentum-pressure"""
         op.addvortexforce(param, mesh, s.U, s.omega, ds.u)
+        print('1',(ds.b[:,100]))
+        print(("U.x",s.U.x[:,100]))
         op.addgrad(mesh, s.ke, ds.u)
         op.addbuoyancy(mesh, s.b, ds.u)
         op.divflux(param, mesh, s.flx, s.b, s.U, ds.b)
         op.fill(mesh, ds.u, ds.b)
+
 
     def diag(s):
         op.pressure_projection(mesh, s.U, s.div, s.p, s.u)
@@ -53,7 +56,7 @@ def get_hydrostatic(param, mesh):
     def diag(s):
         op.sharp(mesh, s.uh, s.U)
         op.compute_vertical_velocity(mesh, s.U)
-        op.apply_pressure_surface_correction(mesh, s.U, s.uh)
+        #op.apply_pressure_surface_correction(mesh, s.U, s.uh)
         op.fill(mesh, s.uh)
         op.sharp(mesh, s.uh, s.U)
         op.compute_vertical_velocity(mesh, s.U)

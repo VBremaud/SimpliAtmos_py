@@ -6,10 +6,11 @@ class RK3Integrator:
     def __init__(self, param, mesh):
         self.scratch = [Prognostic(param, mesh.shape) for _ in range(3)]
         self.rhs, self.diag = get_rhs_and_diag(param, mesh)
+        self.forcing = param.forcing 
 
-    def step(self, state, time):
+    def step(self, state, param, mesh, time):
         ds1, ds2, ds3 = self.scratch
-
+        print(type(ds1.u))
         self.rhs(state, ds1)
         addto(state, time.dt, ds1)
         self.diag(state)
@@ -21,5 +22,8 @@ class RK3Integrator:
         self.rhs(state, ds3)
         addto(state, -time.dt/12, ds1, -time.dt/12, ds2, 2*time.dt/3, ds3)
         self.diag(state)
+
+        if self.forcing is not None:
+            self.forcing(param, mesh, state, ds3)
 
         time.pushforward()

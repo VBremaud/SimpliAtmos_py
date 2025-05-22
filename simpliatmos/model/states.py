@@ -57,3 +57,30 @@ class Prognostic:
 
         else:
             raise ValueError(f"Model {model} not supported in this version.")
+
+def init_state(state, mesh, param):
+    x, y = mesh.xy()
+
+    if param.model == "boussinesq":
+        # vitesse initiale nulle
+        state.u[:, :] = 0.0
+        state.U.x[:, :] = 0.0
+        state.U.y[:, :] = 0.0
+
+        state.b[:, :] = 10*y #+1e-2*np.random.normal(size=mesh.shape)
+        state.b *= mesh.msk
+
+    elif param.model == "euler":
+        # Onde sinusoidale en vitesse u
+        state.u[:, :] = np.sin(2 * np.pi * x / param.Lx)
+        state.U.x[:, :] = state.u[:, :] / mesh.dx**2
+        state.U.y[:, :] = 0.0
+
+    elif param.model == "hydrostatic":
+        state.b[:, :] = 0.0
+        state.uh[:, :] = 0.0
+        state.U.x[:, :] = 0.0
+        state.U.y[:, :] = 0.0
+
+    else:
+        raise ValueError(f"Initialisation non définie pour modèle {param.model}")

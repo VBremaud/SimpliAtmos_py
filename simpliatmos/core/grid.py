@@ -21,8 +21,10 @@ class Mesh:
 
     def set_default_mask(self):
         nh = self.param.halowidth
-        self.msk = np.zeros(self.shape, dtype="i1")
-        self.msk[nh:-nh, nh:-nh] = 1
+        self.msk = self._allocate()
+        xdx = slice(None) if self.param.xperiodic else slice(nh, -nh)
+        ydx = slice(None) if self.param.yperiodic else slice(nh, -nh)
+        self.msk[ydx, xdx] = 1
 
     def set_masks(self):
         self.mskx = np.zeros_like(self.msk, dtype="i1")
@@ -55,6 +57,9 @@ class Mesh:
                 for field in variable:
                     self.fill(getattr(variable, field))
         # tu pourras étendre pour yperiodic, ou autres BCs
+    
+    def _allocate(self):
+        return np.zeros(self.shape, dtype="i1")
     
 def get_idx(param, periodic, n):
     return np.arange(n+2*param.halowidth)-param.halowidth

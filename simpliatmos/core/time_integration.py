@@ -10,7 +10,7 @@ class RK3Integrator:
     def step(self, state, param, mesh, time):
         ds1, ds2, ds3 = self.scratch
         #print(type(ds1.u))
-        print("initp",state.p[50,100])
+        #print("initp",state.p[50,100])
         self.rhs(state, ds1)
         addto(state, time.dt, ds1)
         self.diag(state)

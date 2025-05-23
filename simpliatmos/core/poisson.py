@@ -11,11 +11,27 @@ class Poisson2D:
         self.A_LU = splinalg.splu(self.A)
 
     def solve(self, rhs, sol):
-        print("x1", sol[:,0])
-        print("rhs", rhs[:,0])
-        print("G", self.G[:,0])
+        """
+        print("x1", sol[55,:])
+        print(np.shape(sol[0,:]))
+        print("rhs", rhs[55,:])
+        print("G", self.G[55,:])
+
+        from scipy.sparse.linalg import norm
+        print("norm:", norm(self.A))
+        print(np.sum(self.mesh.msk))             # nb de points "valides"
+        print(np.sum(self.G > -1))  # nb de points dans le système linéaire
+        print(np.unique(self.G))  
+        
+        for i in range(45, 56):
+            print("sol",i, sol[i,:])
+            print("rhs",i, rhs[i,:])
+            print("G",i, self.G[i,:])
+            print("A",i, self.A[i,:])
+        print(test)
+        """
         sol[self.G > -1] = self.A_LU.solve(rhs[self.G > -1])
-        print("x2", sol[:,100])
+        #print("x2", sol[:,100])
 def get_Gindex(msk):
     G = np.zeros(msk.shape, dtype="i")
     G[msk == 0] = -1

@@ -3,7 +3,7 @@ class Param:
         # Choix du modèle
         self.model = "boussinesq"  # "euler", "boussinesq", "hydrostatic"
         self.forcing = "thermal_forcing"
-        self.Q = 0
+        self.Q = 1.0
 
         # Grille
         self.nx = 200
@@ -20,11 +20,12 @@ class Param:
         self.H = 1.0
 
         # Temps
-        self.tend = 500     # durée totale simulée
+        self.tend = 200     # durée totale simulée
         self.dt = 0.0          # si 0, alors calcul automatique via CFL
         self.dtmax = 0.1      # limite maximale du pas de temps
-        self.maxite = 1000   # nombre d’itérations max
+        self.maxite = 2000   # nombre d’itérations max
         self.cfl = 0.9
+        self.nthreads = 32
 
         # Impression console / sauvegarde
         self.nprint = 10
@@ -41,6 +42,6 @@ class Param:
     def check(self):
         assert self.model in ["euler", "boussinesq", "hydrostatic"]
         assert self.integrator == "rk3"
-        assert self.compflux in ["centered"]
+        assert self.compflux in ["centered","weno"]
         assert self.vortexforce in ["centered"]
         assert self.innerproduct in ["classic"]
